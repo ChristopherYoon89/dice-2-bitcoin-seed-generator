@@ -1,0 +1,50 @@
+#----------------------
+# Environment variables
+#----------------------
+.env
+config.json
+
+#----------------------
+# Compiled programs
+#----------------------
+main_program
+devtool
+
+
+#----------------------
+# Virtual environments
+#----------------------
+venv/
+.venv/
+
+#----------------------
+# Python cache / bytecode
+#----------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+#----------------------
+# IDE / editor settings
+#----------------------
+.vscode/
+.idea/
+
+#----------------------
+# OS files
+#----------------------
+.DS_Store
+Thumbs.db
+
+#----------------------
+# Testing / coverage
+#----------------------
+.coverage
+htmlcov/
+
+#----------------------
+# Other files
+#----------------------
+gitworkflow.txt
+compile_command.txt
