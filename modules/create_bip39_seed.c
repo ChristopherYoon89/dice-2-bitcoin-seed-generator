@@ -55,7 +55,7 @@ int create_bip39_seed(void) {
 	printf("\033[2J\033[H");
 	menu_header();
 	printf("================================================================\n");
-	printf("                          DICE ENTROPY\n");
+	printf("                       BIP 39 DICE ENTROPY\n");
 	printf("================================================================\n\n");
 	printf("1. Roll a six-sided dice 100 times. You can speed up the process\n");
 	printf("   by using more than one dice at the same time.\n");
@@ -111,6 +111,7 @@ int create_bip39_seed(void) {
 
 	printf("\n\n\n");
 
+	/* Convert indexes into BIP39 seed phrase */
 	if (parse_bip39_wordlist("Words/bip39_word_list.txt", wordlist) == 0) {
 		printf("Could not load BIP39 wordlist.\n\n");
 		return 0;
@@ -119,8 +120,10 @@ int create_bip39_seed(void) {
 	convert_indexes_to_bip39_words(indexes, wordlist);
 
 	printf("\n\n\n");
+	printf("Use the seed phrase to generate a wallet compatible with the BIP 39 standard and store it in a secure way.");
+	printf("\n\n\n");
 
-	printf("Press 'Enter' to continue and create seed and seed phrase\n");
+	printf("Press 'Enter' to go back to the main menu\n");
 	fgets(continue_button, sizeof(continue_button), stdin);
 
 }

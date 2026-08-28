@@ -1,16 +1,334 @@
 # Dice2SeedGenerator
 
-A C program that generates Bitcoin seed phrases from physical dice rolls.
+A program written in C that generates Bitcoin seed phrases from physical dice rolls.
 
-## Status
+The program converts **100 six-sided dice rolls** into two types of Bitcoin wallet seed phrases:
 
-Currently under development.
+1. **BIP39 mnemonic**
+2. **Electrum mnemonic**
 
-## Warning
+The purpose of this project is to provide a transparent, open-source method for generating wallet seed phrases using physical randomness rather than relying exclusively on a computer's random number generator.
 
-This project is experimental and should not be used to generate
-real Bitcoin wallets until the implementation has been
-thoroughly tested and independently reviewed.
+**Important:** Please read this README.md before you are using the program to generate a seed phrase for real Bitcoin funds.
+
+## What the Program Does
+
+The high-level process of the seed generation process consists of the following steps:
+
+```text
+Physical dice rolls
+        │
+        ▼
+100 numbers between 1 and 6
+        │
+        ▼
+Parse numbers and validate input
+        │
+        ▼
+Convert into base6 digits (1–6 → 0–5)
+        │
+        ▼
+Interpret sequence as a base-6 number
+        │
+        ▼
+Convert number to binary representation
+        │
+        ▼
+Use SHA-256 to convert binary 
+representation into 256 bit hash
+        │
+        ├───────────────┐
+        ▼               ▼
+     BIP39           Electrum
+   mnemonic          mnemonic
+```
+
+The exact final procedure differs between BIP39 and Electrum because the two wallet standards use different mnemonic-generation mechanisms.
+
+
+# BIP39 Generation
+
+## Step 1 — Generate Physical Entropy
+
+The user rolls a fair six-sided die **100 times**.
+
+Each roll must produce one of:
+
+```text
+1 2 3 4 5 6
+```
+
+The results are entered into the program separated by spaces:
+
+```text
+4 2 6 1 5 3 6 2 4 1 ...
+```
+
+The program requires exactly **100 rolls**.
+
+More than one physical die can be used simultaneously to make the process faster. However, each individual die result must still be recorded and the total number of recorded results must be exactly 100.
+
+For example, five dice can be rolled 20 times:
+
+```text
+5 dice × 20 throws = 100 results
+```
+
+The security of this step depends on the dice being sufficiently unpredictable and the user recording the results correctly.
+
+
+## Step 2 — Validate the Dice Input
+
+The program reads the complete input line and parses the individual numbers.
+
+For every number, it checks that:
+
+* A number was actually entered.
+* The number can be converted successfully.
+* No integer conversion overflow occurred.
+* The value is between **1 and 6**.
+* Exactly **100 values** were entered.
+* There is no unexpected additional input after the 100th value.
+
+Invalid input is rejected and the user is asked to enter the sequence again.
+
+
+## Step 3 — Convert Dice Values to Base-6 Digits
+
+The dice values are converted from:
+
+```text
+1 → 0
+2 → 1
+3 → 2
+4 → 3
+5 → 4
+6 → 5
+```
+
+into a sequence of 100 base-6 digits.
+
+For example:
+
+```text
+Dice:
+4 2 6 1 5
+
+Base-6:
+3 1 5 0 4
+```
+
+This conversion is necessary because a six-sided die has six possible outcomes, naturally corresponding to the six possible base-6 digits:
+
+```text
+0, 1, 2, 3, 4, 5
+```
+
+The conversion itself does not create or remove randomness. It simply changes the representation.
+
+
+## Step 4 — Convert the Base-6 Sequence into a Large Integer
+
+The 100 base-6 digits are interpreted as one large integer.
+
+Conceptually, the sequence:
+
+```text
+d₀ d₁ d₂ ... d₉₉
+```
+
+represents:
+
+```text
+d₀ × 6⁹⁹ + d₁ × 6⁹⁸ + ... + d₉₉
+```
+
+Because this number is far too large for standard C integer types such as `uint64_t`, the program implements the integer using an array of bytes.
+
+The program processes the base-6 digits sequentially using repeated multiplication by 6 and addition.
+
+The resulting number is stored as a binary integer.
+
+
+## Step 5 — Convert the Large Integer to SHA-256 Input
+
+The resulting large integer is represented as a fixed-length binary byte sequence.
+
+This binary representation is then supplied to SHA-256.
+
+SHA-256 produces exactly:
+
+```text
+256 bits
+```
+
+or:
+
+```text
+32 bytes
+```
+
+The resulting 32-byte value becomes the 256-bit entropy used for BIP39 mnemonic generation.
+
+The SHA-256 operation acts as an entropy extraction/compression step: the dice input contains slightly more than 256 bits of theoretical information, while SHA-256 produces a fixed 256-bit output.
+
+
+## Step 6 — Calculate the BIP39 Checksum
+
+BIP39 does not simply convert 256 bits directly into 24 words.
+
+For 256-bit entropy, BIP39 requires an additional **8-bit checksum**.
+
+The program calculates:
+
+```text
+SHA-256(entropy)
+```
+
+and takes the first 8 bits of the resulting hash.
+
+The data is therefore:
+
+```text
+256-bit entropy + 8-bit checksum
+```
+
+giving:
+
+```text
+264 bits
+```
+
+
+## Step 7 — Divide the 264 Bits into 24 Groups
+
+BIP39 uses a word list containing **2048 words**.
+
+Since:
+
+```text
+2048 = 2¹¹
+```
+
+each word corresponds to an 11-bit number.
+
+The 264 bits are therefore divided into:
+
+```text
+264 / 11 = 24
+```
+
+groups.
+
+Conceptually:
+
+```text
+256 bits entropy
+       +
+8 bits checksum
+       │
+       ▼
+264 bits
+       │
+       ▼
+24 × 11-bit indexes
+```
+
+Each index has a value from:
+
+```text
+0–2047
+```
+
+
+## Step 8 — Convert the Indexes into BIP39 Words
+
+The program loads the official BIP39 English word list containing 2048 words.
+
+Each 11-bit index is used as an index into the word list.
+
+For example:
+
+```text
+index 0    → abandon
+index 1    → ability
+index 2    → able
+...
+index 2047 → zoo
+```
+
+The 24 resulting words form the BIP39 mnemonic.
+
+
+# Important Security Considerations
+
+## Physical Randomness
+
+The security of the generated wallet ultimately depends on the randomness of the dice rolls.
+
+The user should:
+
+* Use physical dice rather than a computer-generated sequence.
+* Use fair, properly manufactured dice.
+* Roll the dice in a way that does not intentionally or unintentionally bias the results.
+* Record every result accurately.
+* Ensure exactly 100 independent rolls are used.
+
+The program cannot compensate for predictable or manipulated physical input.
+
+
+## Do Not Reuse Dice Rolls
+
+A dice sequence used to generate a wallet should be treated as sensitive secret material.
+
+Do not publish or reuse the sequence for another wallet.
+
+Anyone who obtains the complete dice sequence and knows the exact generation procedure may be able to reproduce the resulting wallet.
+
+
+## Do Not Test With Real Funds Initially
+
+During development and testing, use wallets containing **no real Bitcoin**.
+
+A successful test should first demonstrate that:
+
+1. The generator produces the expected output for known test vectors.
+2. The generated mnemonic is valid.
+3. The mnemonic can be restored.
+4. The same mnemonic consistently produces the same wallet.
+5. Independent implementations produce the same results.
+
+Only after extensive testing and review should the software be considered for real funds.
+
+
+# Electrum Seed Generation
+
+The program also supports Electrum seed phrases.
+
+Electrum uses a different mnemonic-generation mechanism from BIP39. Therefore, the BIP39 procedure described above **must not be assumed to apply to Electrum seeds**.
+
+The Electrum implementation is currently under development and will be documented separately once the implementation and its test procedure have been finalized.
+
+
+# Project Status
+
+**Currently under development.**
+
+The BIP39 generation pipeline is implemented and has been tested by importing a generated mnemonic into Sparrow Wallet.
+
+Further testing against official test vectors, independent implementations, and the complete wallet derivation process is required before the software should be considered production-ready.
+
+
+# Warning
+
+**This project is experimental.**
+
+Do not use Dice2SeedGenerator to generate a wallet containing real Bitcoin until the implementation has been thoroughly tested and independently reviewed.
+
+Cryptocurrency seed generation is security-critical software. An implementation error can result in permanent loss of funds.
+
+The author makes no guarantee that the generated seed phrases are secure or suitable for storing cryptocurrency.
+
 
 
 
