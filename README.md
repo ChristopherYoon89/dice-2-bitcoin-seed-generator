@@ -323,11 +323,11 @@ Further testing against official test vectors, independent implementations, and 
 
 **This project is experimental.**
 
-Do not use Dice2SeedGenerator to generate a wallet containing real Bitcoin until the implementation has been thoroughly tested and independently reviewed.
+Do not use Dice2SeedGenerator to generate a wallet containing real Bitcoin until the implementation has been thoroughly tested and independently reviewed. I will further test the program in the following days and will report the test results. 
 
-Cryptocurrency seed generation is security-critical software. An implementation error can result in permanent loss of funds.
+Bitcoin seed generation is security-critical software. An implementation error can result in permanent loss of funds.
 
-The author makes no guarantee that the generated seed phrases are secure or suitable for storing cryptocurrency.
+The author makes no guarantee that the generated seed phrases are secure or suitable for storing Bitcoin or other cryptocurrencies.
 
 
 
