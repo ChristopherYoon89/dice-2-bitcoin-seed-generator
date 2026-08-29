@@ -16,16 +16,13 @@ The purpose of this project is to provide a transparent, open-source method for 
 The high-level process of the seed generation process consists of the following steps:
 
 ```text
-Physical dice rolls
-        │
-        ▼
-100 numbers between 1 and 6
+100 physical dice rolls between 1 and 6
         │
         ▼
 Parse numbers and validate input
         │
         ▼
-Convert into base6 digits (1–6 → 0–5)
+Convert sequence into base6 digits (1–6 → 0–5)
         │
         ▼
 Interpret sequence as a base-6 number
@@ -34,8 +31,7 @@ Interpret sequence as a base-6 number
 Convert number to binary representation
         │
         ▼
-Use SHA-256 to convert binary 
-representation into 256 bit hash
+Convert binary representation into SHA-256 hash
         │
         ├───────────────┐
         ▼               ▼
@@ -43,20 +39,16 @@ representation into 256 bit hash
    mnemonic          mnemonic
 ```
 
-The exact final procedure differs between BIP39 and Electrum because the two wallet standards use different mnemonic-generation mechanisms.
+The final step differs between BIP39 and Electrum because the two wallet standards use different mnemonic-generation mechanisms.
 
 
 # BIP39 Generation
 
 ## Step 1 — Generate Physical Entropy
 
-The user rolls a fair six-sided die **100 times**.
+The user rolls a six-sided die **100 times**.
 
-Each roll must produce one of:
-
-```text
-1 2 3 4 5 6
-```
+Each roll must result in a number between 1 and 6:
 
 The results are entered into the program separated by spaces:
 
@@ -64,7 +56,7 @@ The results are entered into the program separated by spaces:
 4 2 6 1 5 3 6 2 4 1 ...
 ```
 
-The program requires exactly **100 rolls**.
+The input requires exactly **100 rolls**. 
 
 More than one physical die can be used simultaneously to make the process faster. However, each individual die result must still be recorded and the total number of recorded results must be exactly 100.
 
