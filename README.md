@@ -110,20 +110,12 @@ Base-6:
 3 1 5 0 4
 ```
 
-This conversion is necessary because a six-sided die has six possible outcomes, naturally corresponding to the six possible base-6 digits:
-
-```text
-0, 1, 2, 3, 4, 5
-```
-
 The conversion itself does not create or remove randomness. It simply changes the representation.
 
 
 ## Step 4 - Convert the base-6 sequence into a large integer
 
-The 100 base-6 digits are interpreted as one large integer.
-
-Conceptually, the sequence:
+In step 4 the 100 base-6 digits are interpreted as one large integer. Conceptually, the sequence:
 
 ```text
 d₀ d₁ d₂ ... d₉₉
@@ -248,26 +240,21 @@ The 24 resulting words form the BIP39 mnemonic.
 
 ## Physical randomness
 
-The security of the generated wallet ultimately depends on the randomness of the dice rolls.
+The security of the generated seed phrase, to a large extend, depends on the randomness of the dice rolls.
 
 The user should comply with the following requirements:
 
-* Use physical dice rather than a random number generator that creates a computer-generated sequence.
-* Use fair, properly manufactured dice.
+* Use dice rolls as real physical randomness rather than a random number generator that creates a computer-generated sequence.
+* Use properly manufactured dice that don't generate biased results.
 * Roll the dice in a way that does not intentionally or unintentionally bias the results.
 * Record every result accurately.
 * Ensure exactly 100 independent rolls are used.
-
-The program cannot compensate for predictable or manipulated physical input.
-
-
-## Do not reuse dice rolls
-
-A dice sequence used to generate a wallet should be treated as sensitive secret material.
-
-Do not publish or reuse the sequence for another wallet.
-
-Anyone who obtains the complete dice sequence and knows the exact generation procedure may be able to reproduce the resulting wallet.
+* Run the program in a trusted, offline environment.
+* Ensure that the computer is free from malware, spyware, keyloggers and other potentially malicious software.
+* A dice sequence used to generate a wallet should be treated as sensitive secret material.
+* Do not publish or reuse the sequence for another wallet.
+* Anyone who obtains the complete dice sequence and knows the exact generation procedure may be able to reproduce the resulting wallet.
+* The program cannot compensate for predictable or manipulated physical input. It is your responsibility to make sure that the dice rolls are truly random.
 
 
 # Electrum seed generation
